@@ -5,36 +5,39 @@ import styled from "styled-components";
 
 const PostShare = () => {
   const navigate = useNavigate();
-  const [image, setImage] = useState({});
+  const [fName, setFName] = useState("");
+  const [lName, setLName] = useState("");
+  const [imageUpload, setImageUpload] = useState(null);
 
-  const [post, setPost] = useState({
-    fName: "",
-    lName: "",
-  });
-
-  console.log(image);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setPost((prev) => {
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
 
   const handleClick = async (e) => {
     e.preventDefault();
+
+    const posts = {
+      fName: fName,
+      lName: lName,
+    };
+
+    if (imageUpload) {
+      let formData = new FormData();
+      let fileName = Date.now() + imageUpload.name;
+      formData.append("name", fileName);
+      formData.append("image", imageUpload);
+      posts.photo = fileName;
+      
+      try {
+        await axios.post("/upload", formData);
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
     try {
       navigate("posts");
-      await axios.post("http://localhost:3001/create", post);
+      await axios.post("/createPost", posts);
     } catch (error) {
       console.log(error);
     }
-    setTimeout(() => {
-      window.location.reload();
-    }, 400);
   };
 
   return (
@@ -44,22 +47,23 @@ const PostShare = () => {
         <Form>
           <input
             name="fName"
-            value={post.fName}
-            onChange={handleChange}
+            value={fName}
+            onChange={(e) => setFName(e.target.value)}
             type="text"
             placeholder="firstName..."
           />
           <input
             name="lName"
-            value={post.lName}
-            onChange={handleChange}
+            value={lName}
+            onChange={(e) => setLName(e.target.value)}
             type="text"
             placeholder="lastName..."
           />
           <input
             type="file"
             name="image"
-            onChange={(e) => setImage(e.target.files[0])}
+            filename="imageUpload"
+            onChange={(e) => setImageUpload(e.target.files[0])}
           />
           <Button onClick={handleClick} className="submit">
             Submit
@@ -72,6 +76,7 @@ const PostShare = () => {
 };
 
 export default PostShare;
+
 
 const Container = styled.div`
   width: 80%;

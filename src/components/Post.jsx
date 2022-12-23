@@ -9,18 +9,22 @@ const Post = () => {
   const [modal, setModal] = useState(false);
   const navigate = useNavigate();
 
+  const folder = "http://localhost:3001/upload/";
+
   useEffect(() => {
-    axios
-      .get("/posts")
-      .then((res) => setNewPost(res.data))
-      .catch((err) => console.log(err));
+    const fetchPost = async () => {
+      const res = await axios.get("/posts");
+      setNewPost(res.data);
+    }
+    fetchPost()
   }, []);
 
-  const removePost = (id) => {
-    axios
-      .delete(`/delete/${id}`)
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+  const removePost = async (id) => {
+    try {
+      await axios.delete(`/delete/${id}`);
+    } catch (error) {
+      console.log(error)
+    }
     setTimeout(() => {
       window.location.reload();
     }, 400);
@@ -42,11 +46,12 @@ const Post = () => {
     });
   };
 
-  const updatedPostSave = () => {
-    axios
-      .put(`/update/${updatedPost._id}`, updatedPost)
-      .then((item) => console.log(item))
-      .catch((err) => console.log(err));
+  const updatedPostSave = async () => {
+    try {
+      await axios.put(`/update/${updatedPost._id}`, updatedPost);
+    } catch (error) {
+      console.log(error.message)
+    }
 
     window.location.reload();
     setModal(false);
@@ -61,6 +66,7 @@ const Post = () => {
             <div className="post" key={i}>
               <h1>First Name : {post.fName}</h1>
               <h1>Last Name : {post.lName}</h1>
+              <img src={folder + post.photo} alt="newImage" />
               <Buttons>
                 <Button onClick={() => updatePost(post)}>Update</Button>
                 <Button onClick={() => removePost(post._id)}>Delete</Button>
